@@ -41,7 +41,8 @@ def search(keywords):
     # retain only docs that contain all kwds
     doc_matches = [{d:c for d,c in docs.items() if d in doc_all_kwds} for docs in doc_matches]
     # calculate the tf-idf scores for each (word,doc) pair
-    scores = [{d:tfidf(kwd, d, docs) for d in docs} for kwd, docs in zip(kwd_matches, doc_matches)]
+    scores = [{d:tfidf(kwd, d, docs) for d in docs_int} 
+              for kwd, docs, docs_int in zip(kwd_matches, doc_matches, doc_matches_intersection)]
     final_scores = reduce(lambda x,y: {k:x[k]+y[k] for k in x}, scores) # sum of scores across docs
     final_scores = [(d,s) for d,s in final_scores.items()]
     final_scores = sorted(final_scores, key=lambda x: x[1], reverse=True)
@@ -59,7 +60,10 @@ def display(doc_ids, keyword):
             title = content[7:content.index('\n')]
             tokenized_content = word_tokenize(content)
             processed_content = list(map(stemmer.stem, tokenized_content))
-            where = processed_content.index(kwd)
+            try:
+                where = processed_content.index(kwd)
+            except:
+                where = 2
             snippet = " ".join(tokenized_content[where-2:where+5])
             doc_info.append((title,snippet))
     
